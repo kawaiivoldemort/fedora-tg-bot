@@ -14,4 +14,4 @@
 #   You should have received a copy of the GNU Affero General Public License
 #   along with the Fedora Telegram Report Bot. If not, see <https://www.gnu.org/licenses/>.
 
-go get "github.com/go-telegram-bot-api/telegram-bot-api" && go get -u "github.com/joho/godotenv" && go run main.go
+go get "gopkg.in/telegram-bot-api.v4" && go get -u "github.com/joho/godotenv" && go run main.go
