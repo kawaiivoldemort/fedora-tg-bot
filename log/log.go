@@ -1,9 +1,25 @@
+/*
+   This file is part of the Fedora Telegram Report Bot.
+
+   The Fedora Telegram Report Bot is free software: you can redistribute it and/or modify
+   it under the terms of the GNU Affero General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+
+   The Fedora Telegram Report Bot is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU Affero General Public License
+   along with the Fedora Telegram Report Bot.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package log
 
 import (
+	"fmt"
 	"strings"
 	"time"
-	"fmt"
 )
 
 // COLORIZE
@@ -33,24 +49,24 @@ const (
 var (
 	// The array describing the exact Replacements for Shell colors
 	replace_map = []string{
-		"{{shell_blue}}",		color_blue,
-		"{{s_b}}",				color_blue,
-		"{{shell_clear}}",		color_clear,
-		"{{s_cl}}",				color_clear,
-		"{{shell_cyan}}",		color_cyan,
-		"{{s_c}}",				color_cyan,
-		"{{shell_green}}",		color_green,
-		"{{s_g}}",				color_green,
-		"{{shell_magenta}}",	color_magenta,
-		"{{s_m}}",				color_magenta,
-		"{{shell_red}}",		color_red,
-		"{{s_r}}",				color_red,
-		"{{shell_white}}",		color_white,
-		"{{s_w}}",				color_white,
-		"{{shell_yellow}}",		color_yellow,
-		"{{s_y}}",				color_yellow,
-		"{{shell_grey}}",		color_grey,
-		"{{s_gy}}",				color_grey,
+		"{{shell_blue}}", color_blue,
+		"{{s_b}}", color_blue,
+		"{{shell_clear}}", color_clear,
+		"{{s_cl}}", color_clear,
+		"{{shell_cyan}}", color_cyan,
+		"{{s_c}}", color_cyan,
+		"{{shell_green}}", color_green,
+		"{{s_g}}", color_green,
+		"{{shell_magenta}}", color_magenta,
+		"{{s_m}}", color_magenta,
+		"{{shell_red}}", color_red,
+		"{{s_r}}", color_red,
+		"{{shell_white}}", color_white,
+		"{{s_w}}", color_white,
+		"{{shell_yellow}}", color_yellow,
+		"{{s_y}}", color_yellow,
+		"{{shell_grey}}", color_grey,
+		"{{s_gy}}", color_grey,
 	}
 	// Color Map Replacer
 	color_replace = strings.NewReplacer(replace_map...)
@@ -65,10 +81,10 @@ func colorize_string(input string) string {
 
 func get_time_string() string {
 	time_string := time.Now().Format("{{s_w}}[{{s_cl}}" +
-		"{{s_m}}02.01{{s_cl}}"	+
-		"{{s_gy}}.2006{{s_cl}}"	+
-		" {{s_g}}15:04{{s_cl}}"	+
-		"{{s_gy}}:05{{s_cl}}"	+
+		"{{s_m}}02.01{{s_cl}}" +
+		"{{s_gy}}.2006{{s_cl}}" +
+		" {{s_g}}15:04{{s_cl}}" +
+		"{{s_gy}}:05{{s_cl}}" +
 		"{{s_w}}]{{s_cl}}")
 	return time_string
 }
@@ -84,7 +100,7 @@ func Log(input string) {
 // Err logs the error message
 func Err(input string, details string) {
 	var log_str = fmt.Sprintf("%s: {{s_r}}ERROR:{{s_cl}} %s", get_time_string(), input)
-	if(details != "") {
+	if details != "" {
 		log_str += " " + details
 	}
 	fmt.Println(colorize_string(log_str))
