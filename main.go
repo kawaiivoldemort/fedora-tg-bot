@@ -18,42 +18,56 @@ package main
 
 import (
 	"os"
+	"strconv"
+	"strings"
 	"time"
-	"./botcommand"
-	"./logging"
+
+	"./botcommands"
+	"./log"
 
 	"github.com/joho/godotenv"
 	"gopkg.in/telegram-bot-api.v4"
 )
 
 var (
-	startTime			time.Time
-	lastReportTime		time.Time
-	lastReminderTime	time.Time
+	start_time  time.Time
+	bot_api_key string
+	chat_infos  []botcommands.Chat_info
 )
 
 func uptime() time.Duration {
-	return time.Since(startTime)
+	return time.Since(start_time)
 }
 
 func main() {
-	startTime = time.Now()
+	start_time = time.Now()
 
-	err := godotenv.Load()
+	err := godotenv.Load(".env")
 	if err != nil {
-		logging.Err("FAILED TO LOAD THE DOTENV!", "")
+		log.Err("FAILED TO LOAD THE DOTENV!", "")
 		os.Exit(1)
 	}
+	bot_api_key = os.Getenv("TELEGRAM_API_BOT_KEY")
+	chat_ids := strings.Split(os.Getenv("CHATIDS"), ",")
+	chat_infos = make([]botcommands.Chat_info, len(chat_ids))
+	for i, chat_id := range chat_ids {
+		n, err := strconv.ParseInt(chat_id, 10, 64)
+		if err != nil {
+			log.Err("ERROR IN EVN, INVALID CHAT ID", chat_id)
+			continue
+		}
+		chat_infos[i] = botcommands.Chat_info{Chat_id: n}
+	}
 
-	bot, err := tgbotapi.NewBotAPI(os.Getenv("TELEGRAM_API_BOT_KEY"))
+	bot, err := tgbotapi.NewBotAPI(bot_api_key)
 	if err != nil {
-		logging.Err("FAILED TO BOOT!", err.Error())
+		log.Err("FAILED TO BOOT!", err.Error())
 		os.Exit(2)
 	}
 
 	bot.Debug = false
 
-	logging.Log("{{s_g}}Authorized on Account:{{s_cl}} {{s_r}}" + bot.Self.UserName + "{{s_cl}}")
+	log.Log("{{s_g}}Authorized on Account:{{s_cl}} {{s_r}}" + bot.Self.UserName + "{{s_cl}}")
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 10
@@ -61,37 +75,23 @@ func main() {
 	updates, err := bot.GetUpdatesChan(u)
 
 	if err != nil {
-		logging.Err("FAILED TO GET UPDATE", err.Error())
+		log.Err("FAILED TO GET UPDATE", err.Error())
 	}
 
 	for update := range updates {
-		logging.Log("{{s_gy}}Starting Goroutine for a new UpdatePackage{{s_cl}}")
+		log.Log("{{s_gy}}Starting Goroutine for a new UpdatePackage{{s_cl}}")
 		go handle(update, bot)
 	}
 }
 
 func handle(update tgbotapi.Update, bot *tgbotapi.BotAPI) {
-
 	if update.Message != nil && update.Message.IsCommand() {
 
 		switch update.Message.Command() {
 		case "report":
-			if update.Message.Chat.ID == -1001038814893 {
-				hour := -(time.Minute * time.Duration(60))
-				checkTime := time.Now().Add(hour)
-				if lastReportTime.IsZero() || checkTime.After(lastReportTime) {
-					lastReportTime = time.Now()
-					lastReminderTime = time.Time{}
-					botcommand.ListAdmins(update, bot, logging.Log, logging.Err)
-				} else if lastReminderTime.IsZero() || checkTime.After(lastReminderTime) {
-					lastReminderTime = time.Now()
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "This Bot will only allow this command to be used every Hour!")
-					if update.Message.ReplyToMessage != nil {
-						msg.BaseChat.ReplyToMessageID = update.Message.MessageID
-					}
-					bot.Send(msg)
-				}
-			}
+			botcommands.Report(update, bot, chat_infos)
+		case "chatid":
+			botcommands.Get_chatid(update, bot)
 		}
 	}
 }
