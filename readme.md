@@ -1,3 +1,5 @@
+Fork of https://git.furworks.de/tobias/fedora-tg-bot.git
+
 # Fedora Telegram Group Report Bot
 
 To setup this project create a .env file from the example and place your actual
